@@ -3,7 +3,6 @@ import {
   createUserWithEmailAndPassword,
   getAuth,
   signInWithEmailAndPassword,
-  signOut,
   UserCredential,
 } from "firebase/auth";
 
@@ -45,7 +44,6 @@ export const signup = async (
     (e) => e as string
   );
 };
-export const logout = () => signOut(auth);
 
 //TODO: add phone auth (requires detaching expo)
 // interface Response {
