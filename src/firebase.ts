@@ -26,6 +26,9 @@ if (getApps().length === 0) {
 const auth = getAuth();
 auth.useDeviceLanguage();
 
+export const user = auth.currentUser;
+export const isAuthorized = () => !!user;
+
 export const login = async (
   email: string,
   password: string

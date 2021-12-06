@@ -1,4 +1,3 @@
-import { useNavigation } from "@react-navigation/core";
 import React, { useState } from "react";
 import {
   StyleSheet,
@@ -9,21 +8,20 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { login, signup } from "../firebase";
+import { RootStackScreenProps } from "../types";
 
-const Login = () => {
+const Login = ({ navigation }: RootStackScreenProps<"Login">) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-
-  let nav = useNavigation();
 
   const handleLogin = async () => {
     setLoading(true);
     const response = await login(email, password);
     setLoading(false);
     if (typeof response === typeof String) setError(response as string);
-    else nav.navigate("NotFound");
+    else navigation.navigate("Home");
   };
 
   const handleSignup = async () => {
@@ -31,7 +29,7 @@ const Login = () => {
     const response = await signup(email, password);
     setLoading(false);
     if (typeof response === typeof String) setError(response as string);
-    else nav.navigate("NotFound");
+    else navigation.navigate("Home");
   };
 
   return (
