@@ -1,4 +1,3 @@
-import { NavigatorScreenParams } from "@react-navigation/native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 
 declare global {
@@ -8,13 +7,17 @@ declare global {
 }
 
 export type RootStackParamList = {
-  Root: NavigatorScreenParams<ParamList> | undefined;
-  NotFound: undefined;
-  Login: undefined;
   Home: undefined;
+  Login: undefined;
+  NotFound: undefined;
 };
 
 export type RootStackScreenProps<Screen extends keyof RootStackParamList> =
   NativeStackScreenProps<RootStackParamList, Screen>;
 
-export type ParamList = {};
+export type SSEvent = {
+  drawDate: Date;
+  title: string;
+  people: string[];
+  id: string;
+};

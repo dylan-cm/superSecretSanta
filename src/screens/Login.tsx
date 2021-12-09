@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import { NativeStackScreenProps } from "@react-navigation/native-stack";
+import React, { useContext, useState } from "react";
 import {
   StyleSheet,
   Text,
@@ -7,29 +8,31 @@ import {
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { login, signup } from "../firebase";
-import { RootStackScreenProps } from "../types";
+import { AuthContext, login, signup } from "../firebase";
+import { RootStackParamList } from "../types";
 
-const Login = ({ navigation }: RootStackScreenProps<"Login">) => {
+const Login = ({
+  navigation,
+}: NativeStackScreenProps<RootStackParamList, "Login">) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [signingUp, setSigningUp] = useState(false);
+  const [name, setName] = useState("");
+
+  const authContext = useContext(AuthContext);
 
   const handleLogin = async () => {
-    setLoading(true);
-    const response = await login(email, password);
-    setLoading(false);
-    if (typeof response === typeof String) setError(response as string);
-    else navigation.navigate("Home");
+    await login(email, password, authContext);
   };
 
   const handleSignup = async () => {
-    setLoading(true);
-    const response = await signup(email, password);
-    setLoading(false);
-    if (typeof response === typeof String) setError(response as string);
-    else navigation.navigate("Home");
+    if (!signingUp) {
+      setSigningUp(true);
+    } else {
+      await signup(email, password, name, authContext);
+    }
   };
 
   return (
@@ -56,17 +59,29 @@ const Login = ({ navigation }: RootStackScreenProps<"Login">) => {
             <Text>Loading...</Text>
           ) : (
             <>
-              <TouchableOpacity
-                onPress={async () => await handleLogin()}
-                style={[styles.button, styles.shadow3]}
-              >
-                <Text style={styles.buttonText}>Login</Text>
-              </TouchableOpacity>
+              {signingUp ? (
+                <TextInput
+                  placeholder="Full Name"
+                  value={name}
+                  onChangeText={(text) => setName(text)}
+                  style={styles.textInput}
+                  autoCompleteType={"name"}
+                />
+              ) : (
+                <TouchableOpacity
+                  onPress={async () => await handleLogin()}
+                  style={[styles.button, styles.shadow3]}
+                >
+                  <Text style={styles.buttonText}>Login</Text>
+                </TouchableOpacity>
+              )}
               <TouchableOpacity
                 onPress={() => handleSignup()}
                 style={[styles.button, styles.shadow3]}
               >
-                <Text style={styles.buttonText}>Join</Text>
+                <Text style={styles.buttonText}>
+                  {signingUp ? "Join" : "Register"}
+                </Text>
               </TouchableOpacity>
             </>
           )}
@@ -82,6 +97,7 @@ export default Login;
 const styles = StyleSheet.create({
   root: {
     backgroundColor: "#ff4141",
+    height: "100%",
   },
   layout: {
     flexDirection: "column",
