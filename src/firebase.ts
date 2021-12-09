@@ -7,18 +7,10 @@ import {
   User,
   UserCredential,
 } from "firebase/auth";
-export { User } from "firebase/auth";
-import {
-  collection,
-  doc,
-  getDoc,
-  getDocs,
-  getFirestore,
-  query,
-  where,
-} from "firebase/firestore";
-import { createContext, useContext } from "react";
+import { doc, getDoc, getFirestore } from "firebase/firestore";
+import { createContext } from "react";
 import { SSEvent } from "./types";
+export { User } from "firebase/auth";
 
 const firebaseConfig = {
   apiKey: "AIzaSyBRlmRJ9rG6TbV2TxOpGSwMjErTLjct0Ak",
@@ -29,36 +21,28 @@ const firebaseConfig = {
   appId: "1:208392692182:web:d110de3f3ceb0b4b458477",
 };
 
-let app;
-if (getApps().length === 0) {
-  app = initializeApp(firebaseConfig);
-} else {
-  app = getApps();
-}
+let app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps();
 
 const db = getFirestore();
 
 export const getEvents = async (): Promise<SSEvent[]> => {
   if (!user) return [];
-  const q = query(
-    collection(db, "events"),
-    where("people", "array-contains", user.displayName)
-  );
-  const qSnapshot = await getDocs(q);
-  if (qSnapshot.size === 0) return [];
-  return qSnapshot.docs.map((event) => ({
-    id: event.id,
-    title: event.data().title,
-    people: event.data().people,
-    drawDate: event.data().drawDate,
-  }));
+  const docRef = doc(db, "users", user.uid);
+  // const docRef = doc(db, "users", "msLmavWDs3TMzVXrPRSnhzXX6aE3"); //--dev only
+  return await getDoc(docRef)
+    .then((doc) =>
+      doc?.data()?.events.map((event: any) => ({
+        ...event,
+        drawDate: !!event.drawDate && new Date(event.drawDate.seconds * 1000),
+      }))
+    )
+    .catch((e) => []);
 };
 
 const auth = getAuth();
 auth.useDeviceLanguage();
 
 export const user = auth.currentUser;
-export const isAuthorized = user !== null;
 
 type ContextProps = {
   userCred?: User | null;
@@ -85,6 +69,7 @@ export const login = async (
     });
   return result;
 };
+
 export const signup = async (
   email: string,
   password: string,

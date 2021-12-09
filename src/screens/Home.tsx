@@ -16,8 +16,9 @@ const Home = ({ navigation }: RootStackScreenProps<"Home">) => {
   const [events, setEvents] = useState<SSEvent[]>([]);
 
   useEffect(() => {
-    getEvents().then((events: SSEvent[]) => setEvents(events));
-    return;
+    getEvents().then((_events) => {
+      setEvents(_events);
+    });
   }, []);
 
   return (
@@ -29,11 +30,26 @@ const Home = ({ navigation }: RootStackScreenProps<"Home">) => {
         showsVerticalScrollIndicator={false}
       >
         <View style={[styles.header, scrollOffset !== 0 && styles.shadow9]}>
-          <Text style={styles.h1}>Super Secret Santa</Text>
+          <Text style={styles.logo}>Super Secret Santa</Text>
         </View>
-        {events.map((event) => (
-          <Card {...event} onPress={(id) => console.log(id)} key={event.id} />
-        ))}
+        {events.map((event, i) => {
+          const rcptId = event.people.find(
+            (item) => item.id === event.adminId
+          )?.rcpt;
+          const rcptName = event.people.find(
+            (item) => item.id === rcptId
+          )?.name;
+          return (
+            <Card
+              people={event.people.length}
+              drawDate={event.drawDate}
+              title={event.title}
+              onPress={(id) => console.log(id)}
+              rcpt={rcptName}
+              key={event.title + i}
+            />
+          );
+        })}
       </ScrollView>
     </SafeAreaView>
   );
@@ -41,100 +57,60 @@ const Home = ({ navigation }: RootStackScreenProps<"Home">) => {
 
 interface CardProps {
   onPress: (id: string) => void;
-  drawDate: Date;
+  drawDate?: Date;
   title: string;
-  people: string[];
-  id: string;
+  people: number;
+  rcpt?: string;
 }
-const Card = ({ id, onPress, drawDate, title, people }: CardProps) => {
-  const calculateTimeLeft = () => {
-    const difference = +drawDate - +new Date();
-    let timeLeft;
-
-    if (difference > 0) {
-      timeLeft = {
-        d: Math.floor(difference / (1000 * 60 * 60 * 24)),
-        h: Math.floor((difference / (1000 * 60 * 60)) % 24),
-        m: Math.floor((difference / 1000 / 60) % 60),
-        s: Math.floor((difference / 1000) % 60),
-      };
-    }
-
-    return timeLeft;
+const Card = ({ onPress, drawDate, title, people, rcpt }: CardProps) => {
+  const options: Intl.DateTimeFormatOptions = {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
   };
-
-  const [timeLeft, setTimeLeft] = useState(calculateTimeLeft());
-
-  useEffect(() => {
-    setTimeout(() => {
-      setTimeLeft(calculateTimeLeft());
-    }, 1000);
-  });
-
   return (
     <View style={styles.cardsContainer}>
       <TouchableHighlight
         style={[styles.cardWrapper, styles.shadow9]}
-        onPress={() => onPress(id)}
+        onPress={() => onPress(title)}
         underlayColor={"#521717"}
       >
         <View style={styles.card}>
-          <Text style={styles.h2}>{title}</Text>
+          <View
+            style={{
+              flexDirection: "row",
+              justifyContent: "space-between",
+            }}
+          >
+            <Text style={styles.h2}>{title}</Text>
+            <View style={styles.pill}>
+              <Text style={styles.pplNum}>{`${people} 🎅`}</Text>
+            </View>
+          </View>
 
-          {!timeLeft ? (
-            <Text>Your Giftee is Bing</Text>
+          {!!rcpt &&
+          (!drawDate || new Date(drawDate) <= new Date(Date.now())) ? (
+            <>
+              <Text style={styles.h3}>You've drawn</Text>
+              <Text style={styles.h1}>{`${rcpt} !!!`}</Text>
+            </>
+          ) : !!drawDate ? (
+            <>
+              <Text style={styles.h3}>Names will be drawn on</Text>
+              <Text style={styles.h1}>
+                {drawDate.toLocaleDateString(undefined, options)}
+              </Text>
+            </>
           ) : (
             <>
-              <Text style={styles.h3}>Drawing in: </Text>
-              <View
-                style={{
-                  flexDirection: "row",
-                  alignItems: "center",
-                  marginBottom: 16,
-                }}
-              >
-                <BigLittleText top={timeLeft.d.toString()} btm={"DAYS"} />
-                <BigLittleText top={timeLeft.h.toString()} btm={"HOURS"} />
-                <BigLittleText top={timeLeft.m.toString()} btm={"MINUTES"} />
-                <BigLittleText top={timeLeft.s.toString()} btm={"SECONDS"} />
-              </View>
+              <Text style={styles.h3}>Names will be drawn soon.</Text>
             </>
           )}
-
-          <Text
-            style={styles.link}
-          >{`${people.length}\tSecret Santas \t >`}</Text>
         </View>
       </TouchableHighlight>
     </View>
   );
 };
-
-const BigLittleText = ({ top, btm }: { top: string; btm: string }) => (
-  <View
-    style={{
-      alignItems: "center",
-      marginHorizontal: 4,
-    }}
-  >
-    <Text
-      style={{
-        color: "#fff",
-        fontSize: 18,
-      }}
-    >
-      {top}
-    </Text>
-    <Text
-      style={{
-        color: "#fff",
-        fontSize: 8,
-      }}
-    >
-      {btm}
-    </Text>
-  </View>
-);
 
 export default Home;
 
@@ -152,33 +128,41 @@ const styles = StyleSheet.create({
     backgroundColor: "#ff4141",
     paddingBottom: 16,
   },
+  logo: {
+    color: "#fff",
+    fontSize: 24,
+    fontWeight: "bold",
+    marginBottom: 24,
+    textAlign: "center",
+  },
   h1: {
     color: "#fff",
     fontSize: 24,
     fontWeight: "bold",
-    textAlign: "center",
-    marginBottom: 24,
+    marginTop: 4,
   },
   h2: {
     color: "#fff",
-    fontSize: 16,
+    fontSize: 18,
+    fontWeight: "bold",
     marginBottom: 16,
   },
   h3: {
     color: "#ffffff",
-    fontSize: 12,
-    marginBottom: 4,
-  },
-  h4: {
-    color: "#aaa9a9",
     fontSize: 16,
-    marginBottom: 16,
   },
-  link: {
-    color: "#b0ffc6",
-    fontSize: 12,
-    marginBottom: 4,
+  pill: {
+    backgroundColor: "#b2ffd0",
+    borderRadius: 16,
+    paddingHorizontal: 4,
+    justifyContent: "center",
+    alignItems: "center",
+    height: 28,
+  },
+  pplNum: {
+    color: "#000",
     fontWeight: "bold",
+    fontSize: 16,
   },
   cardWrapper: {
     borderRadius: 12,
@@ -194,7 +178,7 @@ const styles = StyleSheet.create({
     overflow: "hidden",
   },
   card: {
-    alignItems: "flex-start",
+    alignItems: "stretch",
   },
   shadow9: {
     shadowColor: "#000",

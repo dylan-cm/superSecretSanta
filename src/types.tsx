@@ -18,6 +18,11 @@ export type RootStackScreenProps<Screen extends keyof RootStackParamList> =
 export type SSEvent = {
   drawDate: Date;
   title: string;
-  people: string[];
-  id: string;
+  people: {
+    name: string;
+    rcpt: string;
+    id: string;
+    phone: string;
+  }[];
+  adminId: string;
 };
