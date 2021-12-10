@@ -44,7 +44,7 @@ const Home = ({ navigation }: RootStackScreenProps<"Home">) => {
               people={event.people.length}
               drawDate={event.drawDate}
               title={event.title}
-              onPress={(id) => console.log(id)}
+              onPress={() => navigation.push("Details", { event })}
               rcpt={rcptName}
               key={event.title + i}
             />
@@ -56,7 +56,7 @@ const Home = ({ navigation }: RootStackScreenProps<"Home">) => {
 };
 
 interface CardProps {
-  onPress: (id: string) => void;
+  onPress: () => void;
   drawDate?: Date;
   title: string;
   people: number;
@@ -72,7 +72,7 @@ const Card = ({ onPress, drawDate, title, people, rcpt }: CardProps) => {
     <View style={styles.cardsContainer}>
       <TouchableHighlight
         style={[styles.cardWrapper, styles.shadow9]}
-        onPress={() => onPress(title)}
+        onPress={() => onPress()}
         underlayColor={"#521717"}
       >
         <View style={styles.card}>

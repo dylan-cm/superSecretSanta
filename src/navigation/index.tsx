@@ -7,6 +7,7 @@ import LinkingConfiguration from "./LinkingConfiguration";
 
 import Home from "../screens/Home";
 import { AuthContext, User } from "../firebase";
+import Details from "../screens/Details";
 
 export default function Navigation() {
   const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -30,11 +31,23 @@ export default function Navigation() {
               options={{ headerShown: false }}
             />
           ) : (
-            <Stack.Screen
-              name="Home"
-              component={Home}
-              options={{ headerShown: false }}
-            />
+            <>
+              <Stack.Screen
+                name="Home"
+                component={Home}
+                options={{ headerShown: false }}
+              />
+              <Stack.Screen
+                name="Details"
+                component={Details}
+                options={({ route }) => ({
+                  headerShown: true,
+                  title: route.params.event.title,
+                  headerStyle: { backgroundColor: "#ff4141" },
+                  headerTintColor: "white",
+                })}
+              />
+            </>
           )}
         </Stack.Navigator>
       </NavigationContainer>
