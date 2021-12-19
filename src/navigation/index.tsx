@@ -24,6 +24,23 @@ export default function Navigation() {
     >
       <NavigationContainer linking={LinkingConfiguration} theme={DefaultTheme}>
         <Stack.Navigator>
+          <Stack.Screen
+            name="Home"
+            component={Home}
+            options={{ headerShown: false }}
+          />
+          <Stack.Screen
+            name="Details"
+            component={Details}
+            options={({ route }) => ({
+              headerShown: true,
+              title: route.params.event.title,
+              headerStyle: { backgroundColor: "#ff4141" },
+              headerTintColor: "white",
+            })}
+          />
+        </Stack.Navigator>
+        {/* <Stack.Navigator>
           {!userCred ? (
             <Stack.Screen
               name="Login"
@@ -49,7 +66,7 @@ export default function Navigation() {
               />
             </>
           )}
-        </Stack.Navigator>
+        </Stack.Navigator> */}
       </NavigationContainer>
     </AuthContext.Provider>
   );
